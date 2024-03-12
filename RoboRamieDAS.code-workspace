@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "RoboRamieDAS",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"math.h": "c"
+		}
+	}
+}

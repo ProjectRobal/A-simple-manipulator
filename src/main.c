@@ -1,6 +1,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
+#include "uart.h"
 
 #include "pca9685.h"
 
@@ -8,9 +11,11 @@
 
 #include "servo.h"
 
-#define UPDATE_TIME_MS 10
+#include <Arduino.h>
 
-#define ON_BUTTON_PIN PD1
+#define UPDATE_TIME_MS 25
+
+#define ON_BUTTON_PIN PD3
 #define ON_BUTTON_DDR DDRD
 #define ON_BUTTON_PORT PORTD
 #define ON_BUTTON_OUT PIND
@@ -24,15 +29,17 @@
 
 #define PWM_FREQ 50
 
-volatile bool Enable=false;
-
 // switch between x/y and x/z mode
 volatile bool AxisMode=false;
 
-#define MOVE_SPEED_COF 1000
+#define MOVE_SPEED_COF 512.f
+
+volatile bool lastButtonState=false;
 
 int main()
 {
+    lastButtonState=AxisMode;
+
     joystick_t joystick={0};
     
     manipulator_t manipulator={
@@ -41,11 +48,11 @@ int main()
         .z=0,
         .joints={
             {
-                .channel=0,
+                .channel=1,
                 .angle=0
             },
             {
-                .channel=1,
+                .channel=0,
                 .angle=0
             },
             {
@@ -57,6 +64,8 @@ int main()
 
     // initialize ADC used by joystick
     init_adc();
+
+    uart_init();
 
     // initialize servo controller
     pca9685_init(0x00,PWM_FREQ);
@@ -72,45 +81,85 @@ int main()
     AXIS_BUTTON_DDR&=~(1<<AXIS_BUTTON_PIN);
     AXIS_BUTTON_PORT|=(1<<AXIS_BUTTON_PIN);
 
+    set_servos(&manipulator);
+
+    lastButtonState=(AXIS_BUTTON_OUT & AXIS_BUTTON_PIN);
+
     while(1)
     {
         // check if button is on
-        if(!(ON_BUTTON_OUT & (1<<ON_BUTTON_PIN)))
-        {
-            Enable=!Enable;
-        }
 
-        if(Enable)
+        bool buttonState=(AXIS_BUTTON_OUT & AXIS_BUTTON_PIN);
+
+        if(lastButtonState != buttonState)
         {
-            if(!(AXIS_BUTTON_OUT & (1<<AXIS_BUTTON_PIN)))
+
+            if(!buttonState)
             {
+                uart_print("Axis switch!");
                 AxisMode=!AxisMode;
             }
 
-            update_joystick(&joystick);
+            lastButtonState=buttonState;
 
-            // move around axis
-
-            if(AxisMode)
-            {
-                // x/y mode
-
-                manipulator.x+=joystick.x/MOVE_SPEED_COF;
-                manipulator.y+=joystick.y/MOVE_SPEED_COF;
-
-            }
-            else
-            {
-                // x/z mode
-
-                manipulator.x+=joystick.x/MOVE_SPEED_COF;
-                manipulator.z+=joystick.y/MOVE_SPEED_COF;
-            }
-
-            calculate_kinematic(&manipulator);
-            set_servos(&manipulator);
         }
 
+        //char buffer[256]={0};
+
+        //sprintf(buffer,"X: %hu : Y: %hu \n",joystick.x,joystick.y);
+
+        //uart_print(buffer);
+
+        // move around axis
+
+        //joystick.x=read_x_axis();
+        //joystick.y=read_y_axis();
+
+        joystick.x=analogRead(A0)-ZERO_POSITION;
+        joystick.y=analogRead(A1)-ZERO_POSITION;
+
+        if(abs(joystick.x)<50)
+        {
+            joystick.x=0;
+        }
+
+        if(abs(joystick.y)<50)
+        {
+            joystick.y=0;
+        }
+
+        if(AxisMode)
+        {
+            // x/y mode
+
+            manipulator.x+=(float)joystick.x/MOVE_SPEED_COF;
+            manipulator.y+=(float)joystick.y/MOVE_SPEED_COF;
+
+        }
+        else
+        {
+            // x/z mode
+
+            manipulator.x+=(float)joystick.x/MOVE_SPEED_COF; 
+            manipulator.z+=(float)joystick.y/MOVE_SPEED_COF;
+        }
+
+        calculate_kinematic(&manipulator);
+
+        char buffer[256]={0};
+
+        sprintf(buffer," q1:%f : q2:%f q3:%f x:%f y:%f z:%f\n",
+        manipulator.joints[0].angle,manipulator.joints[1].angle,manipulator.joints[2].angle,
+        manipulator.x,manipulator.y,manipulator.z
+        );
+
+        uart_print(buffer);
+
+        set_servos(&manipulator);
+
         _delay_ms(UPDATE_TIME_MS);
+
     }
+
+    return 0;
 }

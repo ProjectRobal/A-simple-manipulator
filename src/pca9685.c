@@ -75,63 +75,23 @@ void pca9685_init(uint8_t address, uint16_t freq)
 }
 
 
-// void pca9685_servo(uint8_t servoNum, float angle)
-// {
-//     /* Set limits on angle (-90 to 90 degrees) */
-//     if (angle > 90) {
-//         angle = 90;
-//     } else if (angle < -90) {
-//         angle = -90;
-//     } else {}
-
-//     /* Calculate the pulse duration in us (note: equation can be optimized) */
-//     uint16_t pulse_us = NEUTRAL_PULSE + angle *\
-//                         ((float)(MAX_PULSE - MIN_PULSE) / (2 * MAX_ANGLE));
-
-//     /* Convert pulse duration into a value from 0 to 4096, which will be
-//        repeated every (1 / frequency) * 1000000 us */
-//     uint16_t period_us = 1000000 / globalFrequency;
-//     uint16_t count = ((float)pulse_us / period_us) * 4096;
-
-//     /* Output turns on at 0 counts (simplest way), and will turn off according
-//        to calculations above. Break the 12-bit count into two 8-bit values */
-//     uint8_t offLowCmnd = count;
-//     uint8_t offHighCmnd = count >> 8;
-
-//     /* Each output is controlled by 2x 12-bit registers: ON to specify the count
-//        time to turn on the LED (a number from 0-4095), and OFF to specify the
-//        count time to turn off the LED (a number from 0-4095). Each 12-bit
-//        register is composed of 2 8-bit registers: a high and low. */
-
-//     /* Select slave device, select LEDXX_ON_L register, set contents of
-//        LEDXX_ON_L, then set contents of next 3 registers in sequence (only if
-//        auto-increment is enabled). */
-//     i2c_tx_start(MASTER_TRANSMITTER);
-//     i2c_tx_address(0x40 + globalAddress);
-//     i2c_tx_byte(SERVO0 + (4 * servoNum)); // select LEDXX_ON_L register
-//     i2c_tx_byte(0x00); // set value of LEDXX_ON_L
-//     i2c_tx_byte(0x00); // set value of LEDXX_ON_H
-//     i2c_tx_byte(offLowCmnd); // set value of LEDXX_OFF_L
-//     i2c_tx_byte(offHighCmnd); // set value of LEDXX_OFF_H
-//     i2c_tx_stop();
-// }
-
-void pca9685_servo(uint8_t servoNum, int32_t angle)
+void pca9685_servo(uint8_t servoNum, float angle)
 {
     /* Set limits on angle (-90 to 90 degrees) */
-    if (angle > 90000) {
-        angle = 90000;
-    } else if (angle < -90000) {
-        angle = -90000;
-    }
+    if (angle > 90) {
+        angle = 90;
+    } else if (angle < -90) {
+        angle = -90;
+    } else {}
 
-    uint16_t pulse_us = NEUTRAL_PULSE + (int32_t)( ((int32_t)((MAX_PULSE - MIN_PULSE)*angle)) / (MAX_ANGLE*2000) );
+    /* Calculate the pulse duration in us (note: equation can be optimized) */
+    uint16_t pulse_us = NEUTRAL_PULSE + angle *\
+                        ((float)(MAX_PULSE - MIN_PULSE) / (2 * MAX_ANGLE));
 
     /* Convert pulse duration into a value from 0 to 4096, which will be
        repeated every (1 / frequency) * 1000000 us */
-    //uint16_t period_us = 1000000 / globalFrequency;
-
-    uint16_t count = ( ((uint32_t)(pulse_us*globalFrequency))/1000000 )*4096;
+    uint16_t period_us = 1000000 / globalFrequency;
+    uint16_t count = ((float)pulse_us / period_us) * 4096;
 
     /* Output turns on at 0 counts (simplest way), and will turn off according
        to calculations above. Break the 12-bit count into two 8-bit values */
@@ -155,3 +115,43 @@ void pca9685_servo(uint8_t servoNum, int32_t angle)
     i2c_tx_byte(offHighCmnd); // set value of LEDXX_OFF_H
     i2c_tx_stop();
 }
+
+// void pca9685_servo(uint8_t servoNum, int32_t angle)
+// {
+//     /* Set limits on angle (-90 to 90 degrees) */
+//     if (angle > 90000) {
+//         angle = 90000;
+//     } else if (angle < -90000) {
+//         angle = -90000;
+//     }
+
+//     uint16_t pulse_us = NEUTRAL_PULSE + (int32_t)( ((int32_t)((MAX_PULSE - MIN_PULSE)*angle)) / (MAX_ANGLE*2000) );
+
+//     /* Convert pulse duration into a value from 0 to 4096, which will be
+//        repeated every (1 / frequency) * 1000000 us */
+//     //uint16_t period_us = 1000000 / globalFrequency;
+
+//     uint16_t count = ( ((uint32_t)(pulse_us*globalFrequency))/1000000 )*4096;
+
+//     /* Output turns on at 0 counts (simplest way), and will turn off according
+//        to calculations above. Break the 12-bit count into two 8-bit values */
+//     uint8_t offLowCmnd = count;
+//     uint8_t offHighCmnd = count >> 8;
+
+//     /* Each output is controlled by 2x 12-bit registers: ON to specify the count
+//        time to turn on the LED (a number from 0-4095), and OFF to specify the
+//        count time to turn off the LED (a number from 0-4095). Each 12-bit
+//        register is composed of 2 8-bit registers: a high and low. */
+
+//     /* Select slave device, select LEDXX_ON_L register, set contents of
+//        LEDXX_ON_L, then set contents of next 3 registers in sequence (only if
+//        auto-increment is enabled). */
+//     i2c_tx_start(MASTER_TRANSMITTER);
+//     i2c_tx_address(0x40 + globalAddress);
+//     i2c_tx_byte(SERVO0 + (4 * servoNum)); // select LEDXX_ON_L register
+//     i2c_tx_byte(0x00); // set value of LEDXX_ON_L
+//     i2c_tx_byte(0x00); // set value of LEDXX_ON_H
+//     i2c_tx_byte(offLowCmnd); // set value of LEDXX_OFF_L
+//     i2c_tx_byte(offHighCmnd); // set value of LEDXX_OFF_H
+//     i2c_tx_stop();
+// }

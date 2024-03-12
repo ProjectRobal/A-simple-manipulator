@@ -16,15 +16,15 @@
 
 typedef struct joint
 {
-    int32_t angle;
+    float angle;
     uint8_t channel;
 } joint_t;
 
 typedef struct manipulator
 {
-    uint32_t x;
-    uint32_t y;
-    uint32_t z;
+    float x;
+    float y;
+    float z;
     joint_t joints[NUMBER_OF_JOINTS];
 } manipulator_t;
 

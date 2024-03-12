@@ -51,7 +51,7 @@ void pca9685_init(uint8_t address, uint16_t freq);
  *                  degrees.
  */
 
-void pca9685_servo(uint8_t servoNum, int32_t angle);
+void pca9685_servo(uint8_t servoNum, float angle);
 
 
 #endif
