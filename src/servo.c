@@ -2,6 +2,22 @@
 #include "servo.h"
 
 
+double clip(double x)
+{
+    if(x>1.f)
+    {
+        return 1.f;
+    }
+
+    if(x<-1.f)
+    {
+        return -1.f;
+    }
+
+    return x;
+}
+
+
 void set_servos(manipulator_t* mani)
 {
     for(uint8_t i=0;i<NUMBER_OF_JOINTS;i++)
@@ -15,10 +31,17 @@ void calculate_kinematic(manipulator_t* mani)
 {
 
     double xy0=mani->x*mani->x + mani->y*mani->y;
+
+    if(xy0 == 0.f)
+    {
+        return;
+    }
+
+    double arq_q3=(mani->z*mani->z + xy0 -L22-L32)/((double)(2*L2*L3));
     
-    double q3= acos((mani->z*mani->z + xy0 -L22-L32)/((double)(2*L2*L3)));
+    double q3= acos(clip(arq_q3));
     
-    double q1 = asin(mani->y/(sqrt(mani->x*mani->x + mani->y*mani->y)));
+    double q1 = asin(clip(mani->y/(sqrt(xy0))));
 
     double q2 = (M_PI/2.f) - atan(mani->z/sqrt(xy0)) - atan(L3*sin(q3)/(L2+L3*cos(q3)));
 

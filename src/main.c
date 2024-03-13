@@ -15,11 +15,6 @@
 
 #define UPDATE_TIME_MS 25
 
-#define ON_BUTTON_PIN PD3
-#define ON_BUTTON_DDR DDRD
-#define ON_BUTTON_PORT PORTD
-#define ON_BUTTON_OUT PIND
-
 
 #define AXIS_BUTTON_PIN PD2
 #define AXIS_BUTTON_DDR DDRD
@@ -32,9 +27,43 @@
 // switch between x/y and x/z mode
 volatile bool AxisMode=false;
 
+volatile bool buttonState=false;
+
 #define MOVE_SPEED_COF 100.f
 
 volatile bool lastButtonState=false;
+
+volatile int debounce=0;
+
+static double clip(double x)
+{
+    if( x > 500.f)
+    {
+        return 500.f;
+    }
+
+    if( x < -500.f)
+    {
+        return -500.f;
+    }
+
+    return x;
+}
+
+double clip_z(double x)
+{
+    if( x > 700.f)
+    {
+        return 700.f;
+    }
+
+    if( x < -75.f)
+    {
+        return -75.f;
+    }
+
+    return x;
+}
 
 int main()
 {
@@ -70,11 +99,11 @@ int main()
     // initialize servo controller
     pca9685_init(0x00,PWM_FREQ);
 
-    // on/off button
-    // input pin
-    ON_BUTTON_DDR&=~(1<<ON_BUTTON_PIN);
-    // hardware pullup
-    ON_BUTTON_PORT|=(1<<ON_BUTTON_PIN);
+    // pin interrupt
+
+    EICRA=(1<<ISC01);
+
+    EIMSK=(1<<INT0);
 
     // joystick button input pin axis switch
 
@@ -89,7 +118,7 @@ int main()
     {
         // check if button is on
 
-        bool buttonState=(AXIS_BUTTON_OUT & AXIS_BUTTON_PIN);
+        /*buttonState=(AXIS_BUTTON_OUT & AXIS_BUTTON_PIN);
 
         if(lastButtonState != buttonState)
         {
@@ -102,7 +131,7 @@ int main()
 
             lastButtonState=buttonState;
 
-        }
+        }*/
 
         //char buffer[256]={0};
 
@@ -118,12 +147,12 @@ int main()
         joystick.x=analogRead(A0)-ZERO_POSITION;
         joystick.y=analogRead(A1)-ZERO_POSITION;
 
-        if(abs(joystick.x)<50)
+        if(abs(joystick.x)<100)
         {
             joystick.x=0;
         }
 
-        if(abs(joystick.y)<50)
+        if(abs(joystick.y)<100)
         {
             joystick.y=0;
         }
@@ -142,6 +171,11 @@ int main()
 
             manipulator.z+=(float)joystick.x/MOVE_SPEED_COF;
         }
+
+        manipulator.x=clip(manipulator.x);
+        manipulator.y=clip(manipulator.y);
+
+        manipulator.z=clip_z(manipulator.z);
 
         float xy0=sqrt(manipulator.x*manipulator.x + manipulator.y*manipulator.y);
 
@@ -163,9 +197,23 @@ int main()
 
         set_servos(&manipulator);
 
+        if(debounce>0)
+        {
+            debounce--;
+        }
+
         _delay_ms(UPDATE_TIME_MS);
 
     }
 
     return 0;
+}
+
+ISR(INT0_vect) 
+{
+    if(debounce==0)
+    {
+        AxisMode=!AxisMode;
+        debounce=5;
+    }
 }
