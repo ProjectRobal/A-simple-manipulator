@@ -32,7 +32,7 @@
 // switch between x/y and x/z mode
 volatile bool AxisMode=false;
 
-#define MOVE_SPEED_COF 512.f
+#define MOVE_SPEED_COF 100.f
 
 volatile bool lastButtonState=false;
 
@@ -44,7 +44,7 @@ int main()
     
     manipulator_t manipulator={
         .x=0,
-        .y=0,
+        .y=300,
         .z=0,
         .joints={
             {
@@ -138,13 +138,19 @@ int main()
         }
         else
         {
-            // x/z mode
+            // z mode
 
-            manipulator.x+=(float)joystick.x/MOVE_SPEED_COF; 
-            manipulator.z+=(float)joystick.y/MOVE_SPEED_COF;
+            manipulator.z+=(float)joystick.x/MOVE_SPEED_COF;
         }
 
+        float xy0=sqrt(manipulator.x*manipulator.x + manipulator.y*manipulator.y);
+
+        if((xy0 >= 280)||(xy0<=380))
+        {
+
         calculate_kinematic(&manipulator);
+
+        }
 
         char buffer[256]={0};
 
