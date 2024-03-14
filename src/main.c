@@ -110,8 +110,6 @@ int main()
     AXIS_BUTTON_DDR&=~(1<<AXIS_BUTTON_PIN);
     AXIS_BUTTON_PORT|=(1<<AXIS_BUTTON_PIN);
 
-    set_servos(&manipulator);
-
     lastButtonState=(AXIS_BUTTON_OUT & AXIS_BUTTON_PIN);
 
     while(1)
