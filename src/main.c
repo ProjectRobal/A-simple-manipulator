@@ -57,9 +57,9 @@ double clip_z(double x)
         return 700.f;
     }
 
-    if( x < -75.f)
+    if( x < -150.f)
     {
-        return -75.f;
+        return -150.f;
     }
 
     return x;
