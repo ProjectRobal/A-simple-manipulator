@@ -24,12 +24,15 @@
 
 #define PWM_FREQ 50
 
+
 // switch between x/y and x/z mode
 volatile bool AxisMode=false;
 
 volatile bool buttonState=false;
 
 #define MOVE_SPEED_COF 100.f
+
+#define ROT_SPEED_COF 150.f
 
 volatile bool lastButtonState=false;
 
@@ -159,7 +162,7 @@ int main()
         {
             // x/y mode
 
-            manipulator.x+=(float)joystick.x/MOVE_SPEED_COF;
+           
             manipulator.y+=(float)joystick.y/MOVE_SPEED_COF;
 
         }
@@ -167,8 +170,12 @@ int main()
         {
             // z mode
 
-            manipulator.z+=(float)joystick.x/MOVE_SPEED_COF;
+            manipulator.z+=(float)joystick.y/MOVE_SPEED_COF;
         }
+
+        // y will drive angle on q3
+
+         manipulator.x+=(float)joystick.x/ROT_SPEED_COF;
 
         manipulator.x=clip(manipulator.x);
         manipulator.y=clip(manipulator.y);

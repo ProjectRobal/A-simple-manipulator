@@ -41,14 +41,26 @@ void calculate_kinematic(manipulator_t* mani)
     
     double q3= acos(clip(arq_q3));
     
-    double q1 = asin(clip(mani->y/(sqrt(xy0))));
+    //double q1 = asin(clip(mani->y/(sqrt(xy0))));
 
     double q2 = (M_PI/2.f) - atan(mani->z/sqrt(xy0)) - atan(L3*sin(q3)/(L2+L3*cos(q3)));
 
-    if(q1 != NAN)
+    //if(q1 != NAN)
+    //{
+        //mani->joints[0].angle=((q1/M_PI) * 180.f);
+    //}   
+
+    if(mani->y>90.f)
     {
-        mani->joints[0].angle=((q1/M_PI) * 180.f);
+        mani->y=90.f;
     }
+    else if(mani->y<-90.f)
+    {
+        mani->y=-90.f;
+    }
+
+    mani->joints[0].angle=mani->y;
+
     if(q2 != NAN)
     {
         mani->joints[1].angle=((q2/M_PI) * 180.f);
