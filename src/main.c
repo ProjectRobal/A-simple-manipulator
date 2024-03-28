@@ -182,7 +182,7 @@ int main()
 
         manipulator.z=clip_z(manipulator.z);
 
-        float xy0=sqrt(manipulator.x*manipulator.x + manipulator.y*manipulator.y);
+        float xy0=sqrt(manipulator.y*manipulator.y);
 
         if((xy0 >= 280)||(xy0<=380))
         {
