@@ -30,7 +30,7 @@ void set_servos(manipulator_t* mani)
 void calculate_kinematic(manipulator_t* mani)
 {
 
-    double xy0=mani->x*mani->x + mani->y*mani->y;
+    double xy0=mani->y*mani->y;
 
     if(xy0 == 0.f)
     {
@@ -50,16 +50,16 @@ void calculate_kinematic(manipulator_t* mani)
         //mani->joints[0].angle=((q1/M_PI) * 180.f);
     //}   
 
-    if(mani->y>90.f)
+    if(mani->x>90.f)
     {
-        mani->y=90.f;
+        mani->x=90.f;
     }
     else if(mani->y<-90.f)
     {
-        mani->y=-90.f;
+        mani->x=-90.f;
     }
 
-    mani->joints[0].angle=mani->y;
+    mani->joints[0].angle=mani->x;
 
     if(q2 != NAN)
     {

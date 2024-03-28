@@ -173,11 +173,11 @@ int main()
             manipulator.z+=(float)joystick.y/MOVE_SPEED_COF;
         }
 
-        // y will drive angle on q3
+        // x will drive angle on q3
 
-         manipulator.x+=(float)joystick.x/ROT_SPEED_COF;
+        manipulator.x+=(float)joystick.x/ROT_SPEED_COF;
 
-        manipulator.x=clip(manipulator.x);
+        //manipulator.x=clip(manipulator.x);
         manipulator.y=clip(manipulator.y);
 
         manipulator.z=clip_z(manipulator.z);
