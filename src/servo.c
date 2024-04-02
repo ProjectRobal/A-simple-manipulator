@@ -54,7 +54,7 @@ void calculate_kinematic(manipulator_t* mani)
     {
         mani->x=90.f;
     }
-    else if(mani->y<-90.f)
+    else if(mani->x<-90.f)
     {
         mani->x=-90.f;
     }

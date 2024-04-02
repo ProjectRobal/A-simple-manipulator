@@ -80,11 +80,11 @@ int main()
         .z=0,
         .joints={
             {
-                .channel=1,
+                .channel=0,
                 .angle=0
             },
             {
-                .channel=0,
+                .channel=1,
                 .angle=0
             },
             {
@@ -145,8 +145,8 @@ int main()
         //joystick.x=read_x_axis();
         //joystick.y=read_y_axis();
 
-        joystick.x=analogRead(A0)-ZERO_POSITION;
-        joystick.y=analogRead(A1)-ZERO_POSITION;
+        joystick.x=analogRead(A1)-ZERO_POSITION;
+        joystick.y=analogRead(A0)-ZERO_POSITION;
 
         if(abs(joystick.x)<100)
         {
