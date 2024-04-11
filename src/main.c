@@ -40,14 +40,14 @@ volatile int debounce=0;
 
 static double clip(double x)
 {
-    if( x > 500.f)
+    if( x > 800.f)
     {
-        return 500.f;
+        return 800.f;
     }
 
-    if( x < -500.f)
+    if( x < -800.f)
     {
-        return -500.f;
+        return -800.f;
     }
 
     return x;
@@ -182,14 +182,7 @@ int main()
 
         manipulator.z=clip_z(manipulator.z);
 
-        float xy0=sqrt(manipulator.y*manipulator.y);
-
-        if((xy0 >= 280)||(xy0<=380))
-        {
-
         calculate_kinematic(&manipulator);
-
-        }
 
         char buffer[256]={0};
 
